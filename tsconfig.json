@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2022", // 现代 js 运行环境
+    "lib": ["es2022", "dom"],
+    "module": "nodenext", // 输出为 esm
+    "declaration": true, // 生成类型声明
+    "outDir": "dist", // 输出目录
+    "strict": true, // 强类型检查推荐开启
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

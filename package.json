@@ -1,0 +1,47 @@
+{
+  "name": "exfat-reader",
+  "description": "A easy tool to read exfat image.",
+  "author": "amatsuka <amatsukamao@qq.com>",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@10.16.1",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "lint": "eslint --ext .ts,.js src",
+    "prettier": "prettier --write 'src/**/*.ts'",
+    "build": "tsup",
+    "build:production": "cross-env NODE_ENV=production tsup",
+    "prepublishOnly": "pnpm run prettier && pnpm run build:production"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
