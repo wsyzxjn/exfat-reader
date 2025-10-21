@@ -5,12 +5,9 @@ import { fileURLToPath } from "node:url";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
-const EXFAT_IMAGE = path.join(
-  rootDir,
-  "../exfat/SDGB_A007_20250619173010_0.exfat"
-);
+const EXFAT_IMAGE = path.join(rootDir, "../exfat/a021.exfat");
 
-const OUTPUT_DIR = path.join(rootDir, "../exfat/SDGB_A007_20250619173010_0");
+const OUTPUT_DIR = path.join(rootDir, "../exfat/a021");
 
 async function main() {
   const reader = new ExfatReader(await fs.readFile(EXFAT_IMAGE));

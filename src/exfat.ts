@@ -246,7 +246,12 @@ export class ExfatReader {
       if (!found) return null;
       if (last) {
         if (found.noFatChain) {
-          return readContiguous(this.buf, this.boot, found.firstCluster, found.size);
+          return readContiguous(
+            this.buf,
+            this.boot,
+            found.firstCluster,
+            found.size
+          );
         }
         const byChain = readChain(
           this.buf,
@@ -255,7 +260,12 @@ export class ExfatReader {
           found.size
         );
         if (byChain.length < found.size) {
-          return readContiguous(this.buf, this.boot, found.firstCluster, found.size);
+          return readContiguous(
+            this.buf,
+            this.boot,
+            found.firstCluster,
+            found.size
+          );
         }
         return byChain;
       }
@@ -290,11 +300,26 @@ export class ExfatReader {
             size: e.size,
             read: () => {
               if (e.noFatChain) {
-                return readContiguous(this.buf, this.boot, e.firstCluster, e.size);
+                return readContiguous(
+                  this.buf,
+                  this.boot,
+                  e.firstCluster,
+                  e.size
+                );
               }
-              const byChain = readChain(this.buf, this.boot, e.firstCluster, e.size);
+              const byChain = readChain(
+                this.buf,
+                this.boot,
+                e.firstCluster,
+                e.size
+              );
               if (byChain.length < e.size) {
-                return readContiguous(this.buf, this.boot, e.firstCluster, e.size);
+                return readContiguous(
+                  this.buf,
+                  this.boot,
+                  e.firstCluster,
+                  e.size
+                );
               }
               return byChain;
             },
