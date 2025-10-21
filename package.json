@@ -2,15 +2,13 @@
   "name": "exfat-reader",
   "description": "A easy tool to read exfat image.",
   "author": "amatsuka <amatsukamao@qq.com>",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "license": "MIT",
   "keywords": [
     "exfat",
     "reader",
     "exfat-reader",
-    "exfat-image",
-    "exfatfs",
-    "exfatfs-reader"
+    "exfat-image"
   ],
   "exports": {
     ".": {

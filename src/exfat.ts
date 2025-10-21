@@ -173,6 +173,13 @@ export type ExfatListItem = {
   size: number;
 };
 
+export type ExfatWalkItem = {
+  path: string;
+  isDir: boolean;
+  size: number;
+  read?: () => Uint8Array;
+};
+
 export class ExfatReader {
   private buf: Uint8Array;
   private boot: Boot;
@@ -227,6 +234,38 @@ export class ExfatReader {
       cluster = found.firstCluster;
     }
     return null;
+  }
+
+  walk(path: string = "/"): ExfatWalkItem[] {
+    const parts = normalizePath(path);
+    let cluster = this.boot.rootDirCluster;
+    for (const part of parts) {
+      const entries = readDirectory(this.buf, this.boot, cluster);
+      const next = entries.find(e => e.isDir && e.name === part);
+      if (!next) return [];
+      cluster = next.firstCluster;
+    }
+    const result: ExfatWalkItem[] = [];
+    const basePath = parts.length ? `/${parts.join("/")}` : "/";
+    const visit = (currentPath: string, c: number) => {
+      const entries = readDirectory(this.buf, this.boot, c);
+      for (const e of entries) {
+        const p = currentPath === "/" ? `/${e.name}` : `${currentPath}/${e.name}`;
+        if (e.isDir) {
+          result.push({ path: p, isDir: true, size: e.size });
+          visit(p, e.firstCluster);
+        } else {
+          result.push({
+            path: p,
+            isDir: false,
+            size: e.size,
+            read: () => readChain(this.buf, this.boot, e.firstCluster, e.size),
+          });
+        }
+      }
+    };
+    visit(basePath, cluster);
+    return result;
   }
 }
 
