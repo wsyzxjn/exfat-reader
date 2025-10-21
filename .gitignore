@@ -3,3 +3,4 @@ dist/
 .env
 .npmrc
 .DS_Store
+exfat

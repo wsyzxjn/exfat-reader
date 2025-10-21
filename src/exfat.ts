@@ -15,6 +15,7 @@ type DirEntry = {
   isDir: boolean;
   size: number;
   firstCluster: number;
+  noFatChain: boolean;
 };
 
 const TD16 = new TextDecoder("utf-16le");
@@ -110,6 +111,18 @@ function readChain(
   return out;
 }
 
+function readContiguous(
+  buf: Uint8Array,
+  boot: Boot,
+  startCluster: number,
+  totalBytes: number
+): Uint8Array {
+  const start = clusterOffset(boot, startCluster);
+  const end = Math.min(buf.length, start + totalBytes);
+  if (start < 0 || start >= buf.length || start >= end) return new Uint8Array();
+  return buf.subarray(start, end);
+}
+
 function readDirectory(
   buf: Uint8Array,
   boot: Boot,
@@ -131,11 +144,14 @@ function readDirectory(
       let name = "";
       let firstCluster = 0;
       let size = 0;
+      let noFatChain = false;
       let consumed = 1;
       let j = i + 32;
       while (consumed <= secondaryCount && j + 32 <= data.length) {
         const st = data[j];
         if (st === 0xc0) {
+          const flags = d.getUint16(j + 0x0c, true);
+          noFatChain = (flags & 0x0001) !== 0;
           firstCluster = readU32(d, j + 0x14);
           size = Number(readU64(d, j + 0x18));
           consumed++;
@@ -153,7 +169,7 @@ function readDirectory(
         j += 32;
       }
       name = name.replace(/\u0000+$/g, "");
-      res.push({ name, isDir, size, firstCluster });
+      res.push({ name, isDir, size, firstCluster, noFatChain });
       i = j;
       continue;
     }
@@ -229,7 +245,19 @@ export class ExfatReader {
       );
       if (!found) return null;
       if (last) {
-        return readChain(this.buf, this.boot, found.firstCluster, found.size);
+        if (found.noFatChain) {
+          return readContiguous(this.buf, this.boot, found.firstCluster, found.size);
+        }
+        const byChain = readChain(
+          this.buf,
+          this.boot,
+          found.firstCluster,
+          found.size
+        );
+        if (byChain.length < found.size) {
+          return readContiguous(this.buf, this.boot, found.firstCluster, found.size);
+        }
+        return byChain;
       }
       cluster = found.firstCluster;
     }
@@ -250,7 +278,8 @@ export class ExfatReader {
     const visit = (currentPath: string, c: number) => {
       const entries = readDirectory(this.buf, this.boot, c);
       for (const e of entries) {
-        const p = currentPath === "/" ? `/${e.name}` : `${currentPath}/${e.name}`;
+        const p =
+          currentPath === "/" ? `/${e.name}` : `${currentPath}/${e.name}`;
         if (e.isDir) {
           result.push({ path: p, isDir: true, size: e.size });
           visit(p, e.firstCluster);
@@ -259,7 +288,16 @@ export class ExfatReader {
             path: p,
             isDir: false,
             size: e.size,
-            read: () => readChain(this.buf, this.boot, e.firstCluster, e.size),
+            read: () => {
+              if (e.noFatChain) {
+                return readContiguous(this.buf, this.boot, e.firstCluster, e.size);
+              }
+              const byChain = readChain(this.buf, this.boot, e.firstCluster, e.size);
+              if (byChain.length < e.size) {
+                return readContiguous(this.buf, this.boot, e.firstCluster, e.size);
+              }
+              return byChain;
+            },
           });
         }
       }

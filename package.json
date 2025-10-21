@@ -2,7 +2,7 @@
   "name": "exfat-reader",
   "description": "A easy tool to read exfat image.",
   "author": "amatsuka <amatsukamao@qq.com>",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "license": "MIT",
   "keywords": [
     "exfat",
@@ -35,7 +35,8 @@
     "lint": "eslint --ext .ts,.js src",
     "prettier": "prettier --write 'src/**/*.ts'",
     "build": "tsup",
-    "prepublishOnly": "pnpm run prettier && pnpm run build"
+    "prepublishOnly": "pnpm run prettier && pnpm run build",
+    "test": "tsx tests/index.ts"
   },
   "devDependencies": {
     "@types/node": "^24.7.2",
